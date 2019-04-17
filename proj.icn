@@ -1,0 +1,100 @@
+global theta, posx, posy, posz, dirx, diry, dirz, prevShape, shape
+
+record activation (node, parent, children)
+
+
+procedure main()
+    &window := open("a torus","gl", "bg=black", "size=800,600") 
+    Fg("diffuse red")
+ 
+    shape := DrawCylinder(0.0, -3.0, -20.0, 5, 0, 1)
+	epsilon := 0.1
+	theta := 0.0
+
+	posx := posy := posz := dirx := diry := dirz := 0
+	every i := 1 to 1000 do {
+		prevShape := shape
+		change := ?11 -1
+		if ?2 = 1 then change := -change
+		if prevShape.radius2+change < 0 then change := 0-prevShape.radius2
+		#write("going from" || prevShape.radius2 || " to " || prevShape.radius2+change)
+		shape := DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, prevShape.radius2+change)
+		updatecamera(0,prevShape.height,0,0)
+		#delay(50)
+		Refresh(w)
+	}
+	
+    while (e := Event(&window)) ~== "q" do {
+       case e of { 
+				"d": updatecamera(0,0,0,epsilon)
+				"a": updatecamera(0,0,0,-epsilon)
+				"w": updatecamera(sin(theta)*epsilon*100,0, - cos(theta)*epsilon*100, 0)
+				"s": updatecamera(- sin(theta)*epsilon*100,0, cos(theta)*epsilon*100, 0)
+				" ": updatecamera(0,5,0,0)
+				"c": updatecamera(0,-5,0,0)	
+			}
+    }
+ 
+    
+end
+
+procedure callback(new, old)
+	case &eventcode of { #try to use table of procedures or "hani's trick"
+	 	E_Pcall | E_Fcall | E_Presum | E_Fresum | E_Psusp | E_Fsusp: {
+	  		drawNode(new.node, colorofone(new.node), white, 0.3)
+			drawNode(old.node, yellow, black, 0.0)
+			drawLine(new.node, old.node, colorofone(old.node))
+	 	}
+		E_Pret | E_Pfail | E_Prem | E_Fret | E_Ffail | E_Frem: {
+			drawNode(old.node, washedcolorofone(old.node), black, 0.0)
+			drawLine(new.node, old.node, black)
+		}
+		E_MXevent: {
+			case &eventvalue of {
+				"q" | "\033": stop("user quit")
+				38: if delayTime = 1 then {
+						delayTime := 5 
+					}
+					else if delayTime = 0 then {
+						delayTime := 1
+					}
+					else if (delayTime + 5) < 101 then {
+						delayTime +:= 5
+					}
+				40: if delayTime = 5 then {
+						delayTime := 1
+					}
+					else if delayTime = 1 then {
+						delayTime := 0
+					}
+					else if (delayTime - 5) > 1 then {
+						delayTime -:= 5
+					}
+				"d": updatecamera(0,0,0,epsilon)
+				"a": updatecamera(0,0,0,-epsilon)
+				"w": updatecamera(sin(theta)*epsilon*100,0, - cos(theta)*epsilon*100, 0)
+				"s": updatecamera(- sin(theta)*epsilon*100,0, cos(theta)*epsilon*100, 0)
+				" ": updatecamera(0,5,0,0)
+				"c": updatecamera(0,-5,0,0)	
+			}
+		}
+	}
+	drawLines()
+	delay(delayTime)
+	Refresh(&window)
+end
+
+procedure updatecamera(dx,dy,dz,dtheta)
+   theta +:= \dtheta
+   posx +:= \dx
+   posy +:= \dy
+   posz +:= \dz
+   dirx := posx + sin(theta)
+   diry := posy
+   dirz := posz - cos(theta)
+   Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
+end
+
+#Napolians march with memory allocations
+#	timeslices are 1 unit long cylinders with R1 being memory usage going in and r2 going out
+	
