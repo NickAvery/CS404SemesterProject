@@ -1,4 +1,4 @@
-global theta, posx, posy, posz, dirx, diry, dirz, prevShape, shape
+global theta, posx, posy, posz, dirx, diry, dirz, shape, rot
 
 record activation (node, parent, children)
 
@@ -6,24 +6,24 @@ record activation (node, parent, children)
 procedure main()
     &window := open("a torus","gl", "bg=black", "size=800,600") 
     Fg("diffuse red")
- 
-    shape := DrawCylinder(0.0, -3.0, -20.0, 5, 0, 1)
-	epsilon := 0.1
+    epsilon := 0.1
 	theta := 0.0
+	rot := 45
+	
+	PushMatrix(&window)
+	 Rotate(rot,0.0,0.0,1.0)
+     shape := DrawCylinder(0.0, -3.0, -20.0, 5, 0, 1)
+	 DrawSphere(0.0, -3.0, -20.0, 5.0)
+	PopMatrix(&window)
+	
+	prevShape := shape
 
 	posx := posy := posz := dirx := diry := dirz := 0
-	every i := 1 to 1000 do {
-		prevShape := shape
-		change := ?11 -1
-		if ?2 = 1 then change := -change
-		if prevShape.radius2+change < 0 then change := 0-prevShape.radius2
-		#write("going from" || prevShape.radius2 || " to " || prevShape.radius2+change)
-		shape := DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, prevShape.radius2+change)
-		updatecamera(0,prevShape.height,0,0)
-		#delay(50)
-		Refresh(w)
-	}
 	
+	updatecamera(0,0,120,0)
+	every i := 1 to 10 do {
+			prevShape := newLayer(prevShape)
+	}
     while (e := Event(&window)) ~== "q" do {
        case e of { 
 				"d": updatecamera(0,0,0,epsilon)
@@ -40,15 +40,6 @@ end
 
 procedure callback(new, old)
 	case &eventcode of { #try to use table of procedures or "hani's trick"
-	 	E_Pcall | E_Fcall | E_Presum | E_Fresum | E_Psusp | E_Fsusp: {
-	  		drawNode(new.node, colorofone(new.node), white, 0.3)
-			drawNode(old.node, yellow, black, 0.0)
-			drawLine(new.node, old.node, colorofone(old.node))
-	 	}
-		E_Pret | E_Pfail | E_Prem | E_Fret | E_Ffail | E_Frem: {
-			drawNode(old.node, washedcolorofone(old.node), black, 0.0)
-			drawLine(new.node, old.node, black)
-		}
 		E_MXevent: {
 			case &eventvalue of {
 				"q" | "\033": stop("user quit")
@@ -79,9 +70,6 @@ procedure callback(new, old)
 			}
 		}
 	}
-	drawLines()
-	delay(delayTime)
-	Refresh(&window)
 end
 
 procedure updatecamera(dx,dy,dz,dtheta)
@@ -95,6 +83,14 @@ procedure updatecamera(dx,dy,dz,dtheta)
    Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
 end
 
-#Napolians march with memory allocations
-#	timeslices are 1 unit long cylinders with R1 being memory usage going in and r2 going out
-	
+procedure newLayer(prevShape)
+	change := ?11 -1
+	if ?2 = 1 then change := -change
+	if prevShape.radius2+change < 0 then change := 0-prevShape.radius2
+	PushMatrix(&window)
+	Rotate(rot, 0.0, 0.0, 1.0)
+	shape := DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, prevShape.radius2+change)
+	PopMatrix(&window)
+	Refresh(w)
+	return shape
+end
