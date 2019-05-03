@@ -6,24 +6,55 @@ record activation (node, parent, children)
 procedure main()
     &window := open("a torus","gl", "bg=black", "size=800,600") 
     Fg("diffuse red")
+	DrawSphere(0.0, 0.0, -20.0, 5.0)
     epsilon := 0.1
 	theta := 0.0
 	rot := 45
-	
-	PushMatrix(&window)
-	 Rotate(rot,0.0,0.0,1.0)
-     shape := DrawCylinder(0.0, -3.0, -20.0, 5, 0, 1)
-	 DrawSphere(0.0, -3.0, -20.0, 5.0)
-	PopMatrix(&window)
-	
+	WAttrib("pick=on")
+	#this is the starting point for all different branch things
+	WSection(&window, "one")
+	 PushMatrix(&window)
+	  Fg("diffuse blue")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(0.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
 	prevShape := shape
 
 	posx := posy := posz := dirx := diry := dirz := 0
 	
 	updatecamera(0,0,120,0)
 	every i := 1 to 10 do {
-			prevShape := newLayer(prevShape)
+		prevShape := newLayer(prevShape, "one")
 	}
+	sectionNum := findWSection("one")
+	rotateSect := WindowContents()[sectionNum+6]
+	every i := 1 to 360 do {
+		rotateSect.angle +:= 1
+		Refresh(w)
+	}
+	every i := 1 to 10 do {
+		prevShape := newLayer(prevShape, "one")
+	}
+	rotateSect.angle := 90
+	rotateSect := WindowContents()[sectionNum+5]
+	every i := 1 to 360 do {
+		rotateSect.angle +:= 1
+		Refresh(w)
+	}
+	every i := 1 to 10 do {
+		prevShape := newLayer(prevShape, "one")
+	}
+	WindowContents()[sectionNum+6].angle := 0
+	rotateSect := WindowContents()[sectionNum+4]
+	every i := 1 to 360 do {
+		rotateSect.angle +:= 1
+		Refresh(w)
+	}
+	
     while (e := Event(&window)) ~== "q" do {
        case e of { 
 				"d": updatecamera(0,0,0,epsilon)
@@ -32,6 +63,10 @@ procedure main()
 				"s": updatecamera(- sin(theta)*epsilon*100,0, cos(theta)*epsilon*100, 0)
 				" ": updatecamera(0,5,0,0)
 				"c": updatecamera(0,-5,0,0)	
+				"r": {
+					WindowContents()[sectionNum].skip := ((WindowContents()[sectionNum].skip +1)%2)
+					Refresh(&window)
+				}
 			}
     }
  
@@ -83,14 +118,57 @@ procedure updatecamera(dx,dy,dz,dtheta)
    Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
 end
 
-procedure newLayer(prevShape)
+procedure newLayer(prevShape, sectionName)
 	change := ?11 -1
 	if ?2 = 1 then change := -change
 	if prevShape.radius2+change < 0 then change := 0-prevShape.radius2
-	PushMatrix(&window)
-	Rotate(rot, 0.0, 0.0, 1.0)
-	shape := DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, prevShape.radius2+change)
-	PopMatrix(&window)
+	DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, prevShape.radius2+change)
+	shape := pull(WindowContents())
+	addToWSection(shape, sectionName)
 	Refresh(w)
 	return shape
+end
+
+procedure addToWSection(shape, sectionName)
+	sectionNum := findWSection(sectionName)
+	if sectionNum ~= -1 then {
+		sect := WindowContents()[sectionNum]
+		insert(WindowContents(), sectionNum+sect.count-1, shape) # -1 for the pop matrix
+		sect.count +:= 1
+		fixParentSections(sectionNum, sect)
+	}
+end
+
+procedure findWSection(sectionName)
+	wlist := WindowContents()
+	i := 1
+	every x := !wlist do { 
+		if type(x) == "gl_mark" then {
+			if x.name == "Mark" then {
+				if x.section_name == sectionName then {
+					return i
+				}
+			}
+		}
+		else{
+			i +:= 1
+		}
+	}
+	return -1
+end
+
+procedure fixParentSections(sectionNum, sect)
+	notParent := 2 		#1 if false, 2 if true
+	i := sect.depth
+	wlist := WindowContents()
+	every x := !wlist do {
+		if i = 1 then break
+		if type(x) == "gl_mark" then {
+			if x.name == "EndMark" then notParent := 1
+			if x.name == "Mark" then {
+				if notParent = 2 then x.count +:= 1
+				if notParent = 1 then notParent := 2
+			}
+		}
+	}
 end
