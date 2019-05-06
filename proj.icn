@@ -4,15 +4,23 @@ record activation (node, parent, children)
 
 
 procedure main()
-    &window := open("a torus","gl", "bg=black", "size=800,600") 
-    Fg("diffuse red")
+    &window := open("Semester Project","gl", "bg=black", "size=800,600") 
+    
+	Fg("diffuse red")
 	DrawSphere(0.0, 0.0, -20.0, 5.0)
-    epsilon := 0.1
+    
+	epsilon := 0.1
 	theta := 0.0
 	rot := 45
+	posx := posy := posz := dirx := diry := dirz := 0
+	updatecamera(0,0,120,0)
+
 	WAttrib("pick=on")
+	
 	#this is the starting point for all different branch things
-	WSection(&window, "one")
+	#can change section names to data type for easier lookups
+	
+	WSection(&window, "list")
 	 PushMatrix(&window)
 	  Fg("diffuse blue")
 	  Translate(0.0, 0.0, -20.0)
@@ -22,36 +30,52 @@ procedure main()
       shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
 	 PopMatrix(&window)
 	WSection(&window)
-	prevShape := shape
-
-	posx := posy := posz := dirx := diry := dirz := 0
 	
-	updatecamera(0,0,120,0)
+	prevShape := shape
+	
+	WSection(&window, "table")
+	 PushMatrix(&window)
+	  Fg("diffuse yellow")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(180.0, 0.0, 0.0, 1.0)
+      shape2 := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	
+	prevShape2 := shape2
+	
+	
 	every i := 1 to 10 do {
-		prevShape := newLayer(prevShape, "one")
+		prevShape := newLayer(prevShape, "list")
+		prevShape2 := newLayer(prevShape2, "table")
 	}
-	sectionNum := findWSection("one")
+	sectionNum := findWSection("list")
 	rotateSect := WindowContents()[sectionNum+6]
+	sectionNum2 := findWSection("table")
+	rotateSect2 := WindowContents()[sectionNum2+6]
 	every i := 1 to 360 do {
 		rotateSect.angle +:= 1
+		rotateSect2.angle +:= 1
 		Refresh(w)
-	}
-	every i := 1 to 10 do {
-		prevShape := newLayer(prevShape, "one")
 	}
 	rotateSect.angle := 90
+	rotateSect2.angle := 270
 	rotateSect := WindowContents()[sectionNum+5]
+	rotateSect2 := WindowContents()[sectionNum2+5]
 	every i := 1 to 360 do {
 		rotateSect.angle +:= 1
+		rotateSect2.angle +:= 1
 		Refresh(w)
 	}
-	every i := 1 to 10 do {
-		prevShape := newLayer(prevShape, "one")
-	}
 	WindowContents()[sectionNum+6].angle := 0
+	WindowContents()[sectionNum2+6].angle := 180
 	rotateSect := WindowContents()[sectionNum+4]
+	rotateSect2 := WindowContents()[sectionNum2+4]
 	every i := 1 to 360 do {
 		rotateSect.angle +:= 1
+		rotateSect2.angle +:= 1
 		Refresh(w)
 	}
 	
@@ -150,9 +174,7 @@ procedure findWSection(sectionName)
 				}
 			}
 		}
-		else{
-			i +:= 1
-		}
+		i +:= 1
 	}
 	return -1
 end
