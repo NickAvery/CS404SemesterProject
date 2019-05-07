@@ -2,10 +2,9 @@ global theta, posx, posy, posz, dirx, diry, dirz, shape, rot
 
 record activation (node, parent, children)
 
-
 procedure main()
     &window := open("Semester Project","gl", "bg=black", "size=800,600") 
-    
+    info := open("Info Screen", "g", "size=300,400")
 	Fg("diffuse red")
 	DrawSphere(0.0, 0.0, -20.0, 5.0)
     
@@ -30,7 +29,6 @@ procedure main()
       shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
 	 PopMatrix(&window)
 	WSection(&window)
-	
 	prevShape := shape
 	
 	WSection(&window, "table")
@@ -78,7 +76,8 @@ procedure main()
 		rotateSect2.angle +:= 1
 		Refresh(w)
 	}
-	
+	sectionNum := -1
+	lastPick := ""
     while (e := Event(&window)) ~== "q" do {
        case e of { 
 				"d": updatecamera(0,0,0,epsilon)
@@ -90,6 +89,76 @@ procedure main()
 				"r": {
 					WindowContents()[sectionNum].skip := ((WindowContents()[sectionNum].skip +1)%2)
 					Refresh(&window)
+				}
+				-1:  {
+					if \&pick then {
+						if &shift then {
+							EraseArea(info)
+
+							DrawString(info, 10, 20, &pick)
+							DrawString(info, 15, 32, "Total Memory: ")
+							DrawString(info, 15, 44, "Last Allocation: ")
+							DrawString(info, 15, 56, "Last Deallocation: ")
+							if lastPick ~== "" then {
+								DrawString(info, 10, 80, lastPick)
+								DrawString(info, 15, 92, "Total Memory: ")
+								DrawString(info, 15, 104, "Last Allocation: ")
+								DrawString(info, 15, 116, "Last Deallocation: ")
+							}
+						}
+						else {
+							EraseArea(info)
+							lastPick := &pick
+							DrawString(info, 10, 20, &pick)
+							DrawString(info, 15, 32, "Total Memory: ")
+							DrawString(info, 15, 44, "Last Allocation: ")
+							DrawString(info, 15, 56, "Last Deallocation: ")
+							WindowContents()[sectionNum+2][4] *:= 2
+							WindowContents()[sectionNum+2][5] *:= 2
+							WindowContents()[sectionNum+2][6] *:= 2
+							sectionNum := findWSection(&pick)
+							WindowContents()[sectionNum+2][4] /:= 2
+							WindowContents()[sectionNum+2][5] /:= 2
+							WindowContents()[sectionNum+2][6] /:= 2
+							Refresh(&window)
+						}
+					}
+				}
+				#rotate - x
+				"j": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+4].angle -:= 1
+					Refresh(x)
+				}
+				#rotate + x
+				"u": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+4].angle +:= 1
+					Refresh(x)
+				}
+				#rotate - y
+				"k": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+5].angle -:= 1
+					Refresh(x)
+				}
+				#rotate + y
+				"i": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+5].angle +:= 1
+					Refresh(x)
+				}
+				#rotate - z
+				"l": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+6].angle -:= 1
+					Refresh(x)
+				}
+				#rotate + z
+				"o": {
+					if sectionNum ~= -1 then
+						WindowContents()[sectionNum+6].angle +:= 1
+					Refresh(x)
 				}
 			}
     }
