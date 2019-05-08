@@ -1,8 +1,13 @@
+$include "evdefs.icn"
+
+link evinit
+
 global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
+
 
 record activation (node, parent, children)
 
-procedure main()
+procedure main(av)
     &window := open("Semester Project","gl", "bg=black", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
 	Fg("diffuse white")
@@ -16,8 +21,16 @@ procedure main()
 
 	WAttrib("pick=on")
 	
+	if *av > 0 then
+		EvInit(av) | stop("EvInit() is unable to load: ", av[1])
+	else
+		EvInit() | stop("Unable to monitor")
+		
+	event_mask := AllocMask
+		
 	#this is the starting point for all different branch things
 	#can change section names to data type for easier lookups
+
 	initSections()
 
 	every i := 1 to 10 do {
@@ -25,6 +38,7 @@ procedure main()
 		if ?2 = 1 then change := -change
 		if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
 		newLayer("list", prevShapes["list"].radius2+change)
+
 		change := ?11 -1
 		if ?2 = 1 then change := -change
 		if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
@@ -143,8 +157,40 @@ procedure main()
 				}
 			}
     }
- 
-    
+	
+end
+
+
+procedure EvMon(event_mask)
+	while EvGet(event_mask) do{
+		case &eventcode of {
+			#"q" | "\033": stop("user quit")
+			
+			E_List   :{
+				write("List Allocated")
+				change := 1
+				prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
+				
+			
+			}
+			E_Lelem  : {write("List Element Allocated")}
+			E_File   : {write("File Allocated")}
+			E_Real   : {write("Real Allocated")}
+			E_Record : {write("Record Allocated")}
+			E_Selem  : {write("Set Element Allocated")}
+			E_Set    : {write("Set Allocated")}
+			E_Slots  : {write("Hash Header Allocated")}
+			E_Table  : {write("Table Allocated")}
+			E_Telem  : {write("Table Element Allocated")}
+			E_Tvsubs : {write("Substring tv Allocated")}
+			E_Tvtbl  : {write("Table-element tv Allocated")}
+			E_Cset   : {write("Cset Allocated")}
+			E_Refresh: {write("Refresh Allocated")}
+			E_String : {write("String Allocated")}
+			E_Coexpr : {write("Co-expression Allocated")}
+		}
+
+	}
 end
 
 #usual update camera function
