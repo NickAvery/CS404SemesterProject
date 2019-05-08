@@ -1,11 +1,11 @@
-global theta, posx, posy, posz, dirx, diry, dirz, shape, rot
+global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
 
 record activation (node, parent, children)
 
 procedure main()
     &window := open("Semester Project","gl", "bg=black", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
-	Fg("diffuse red")
+	Fg("diffuse white")
 	DrawSphere(0.0, 0.0, -20.0, 5.0)
     
 	epsilon := 0.1
@@ -18,42 +18,17 @@ procedure main()
 	
 	#this is the starting point for all different branch things
 	#can change section names to data type for easier lookups
-	
-	WSection(&window, "list")
-	 PushMatrix(&window)
-	  Fg("diffuse blue")
-	  Translate(0.0, 0.0, -20.0)
-	  Rotate(0.0, 1.0, 0.0, 0.0)
-	  Rotate(0.0, 0.0, 1.0, 0.0)
-	  Rotate(0.0, 0.0, 0.0, 1.0)
-      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
-	 PopMatrix(&window)
-	WSection(&window)
-	prevShape := shape
-	
-	WSection(&window, "table")
-	 PushMatrix(&window)
-	  Fg("diffuse yellow")
-	  Translate(0.0, 0.0, -20.0)
-	  Rotate(0.0, 1.0, 0.0, 0.0)
-	  Rotate(0.0, 0.0, 1.0, 0.0)
-	  Rotate(180.0, 0.0, 0.0, 1.0)
-      shape2 := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
-	 PopMatrix(&window)
-	WSection(&window)
-	
-	prevShape2 := shape2
-	
-	
+	initSections()
+
 	every i := 1 to 10 do {
 		change := ?11 -1
 		if ?2 = 1 then change := -change
-		if prevShape.radius2+change < 0 then change := 0-prevShape.radius2
-		prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
+		if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
+		prevShapes["list"] := newLayer(prevShapes["list"], "list", prevShapes["list"].radius2+change)
 		change := ?11 -1
 		if ?2 = 1 then change := -change
-		if prevShape2.radius2+change < 0 then change := 0-prevShape2.radius2
-		prevShape2 := newLayer(prevShape2, "table", prevShape2.radius2+change)
+		if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
+		prevShapes["table"] := newLayer(prevShapes["table"], "table", prevShapes["table"].radius2+change)
 	}
 	sectionNum := findWSection("list")
 	rotateSect := WindowContents()[sectionNum+6]
@@ -172,41 +147,6 @@ procedure main()
     
 end
 
-#callback for evinit
-procedure callback(new, old)
-	case &eventcode of { #try to use table of procedures or "hani's trick"
-		E_MXevent: {
-			case &eventvalue of {
-				"q" | "\033": stop("user quit")
-				38: if delayTime = 1 then {
-						delayTime := 5 
-					}
-					else if delayTime = 0 then {
-						delayTime := 1
-					}
-					else if (delayTime + 5) < 101 then {
-						delayTime +:= 5
-					}
-				40: if delayTime = 5 then {
-						delayTime := 1
-					}
-					else if delayTime = 1 then {
-						delayTime := 0
-					}
-					else if (delayTime - 5) > 1 then {
-						delayTime -:= 5
-					}
-				"d": updatecamera(0,0,0,epsilon)
-				"a": updatecamera(0,0,0,-epsilon)
-				"w": updatecamera(sin(theta)*epsilon*100,0, - cos(theta)*epsilon*100, 0)
-				"s": updatecamera(- sin(theta)*epsilon*100,0, cos(theta)*epsilon*100, 0)
-				" ": updatecamera(0,5,0,0)
-				"c": updatecamera(0,-5,0,0)	
-			}
-		}
-	}
-end
-
 #usual update camera function
 procedure updatecamera(dx,dy,dz,dtheta)
    theta +:= \dtheta
@@ -217,6 +157,83 @@ procedure updatecamera(dx,dy,dz,dtheta)
    diry := posy
    dirz := posz - cos(theta)
    Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
+end
+
+#helper for creating all the different data type sections
+procedure initSections()
+	prevShapes := table()
+	
+	WSection(&window, "list")
+	 PushMatrix(&window)
+	  Fg("diffuse red")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(0.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["list"] := shape
+	
+	WSection(&window, "table")
+	 PushMatrix(&window)
+	  Fg("diffuse yellow")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(180.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["table"] := shape
+	
+	WSection(&window, "string")
+	 PushMatrix(&window)
+	  Fg("diffuse orange")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(90.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(0.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["string"] := shape
+	
+	WSection(&window, "real")
+	 PushMatrix(&window)
+	  Fg("diffuse green")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(90.0, 1.0, 0.0, 0.0)
+	  Rotate(180.0, 0.0, 1.0, 0.0)
+	  Rotate(0.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["real"] := shape
+	
+	WSection(&window, "record")
+	 PushMatrix(&window)
+	  Fg("diffuse blue")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(0.0, 0.0, 1.0, 0.0)
+	  Rotate(90.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["record"] := shape
+	
+	WSection(&window, "set")
+	 PushMatrix(&window)
+	  Fg("diffuse purple")
+	  Translate(0.0, 0.0, -20.0)
+	  Rotate(0.0, 1.0, 0.0, 0.0)
+	  Rotate(180.0, 0.0, 1.0, 0.0)
+	  Rotate(90.0, 0.0, 0.0, 1.0)
+      shape := DrawCylinder(0.0, 0.0, 0.0, 5, 0, 1)
+	 PopMatrix(&window)
+	WSection(&window)
+	prevShapes["set"] := shape
 end
 
 #add a new layer to a section given a name and new radius to go to. uses the previous layer to build on, so make sure to save the result
