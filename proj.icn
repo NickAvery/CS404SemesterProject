@@ -219,7 +219,7 @@ procedure updatecamera(dx,dy,dz,dtheta)
    Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
 end
 
-#add a new layer to a section given a name and new radius to go to.
+#add a new layer to a section given a name and new radius to go to. uses the previous layer to build on, so make sure to save the result
 procedure newLayer(prevShape, sectionName, newRadius)
 	DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, newRadius)
 	shape := pull(WindowContents())
