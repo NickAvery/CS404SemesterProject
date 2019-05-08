@@ -24,11 +24,11 @@ procedure main()
 		change := ?11 -1
 		if ?2 = 1 then change := -change
 		if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
-		prevShapes["list"] := newLayer(prevShapes["list"], "list", prevShapes["list"].radius2+change)
+		newLayer("list", prevShapes["list"].radius2+change)
 		change := ?11 -1
 		if ?2 = 1 then change := -change
 		if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
-		prevShapes["table"] := newLayer(prevShapes["table"], "table", prevShapes["table"].radius2+change)
+		newLayer("table", prevShapes["table"].radius2+change)
 	}
 	sectionNum := findWSection("list")
 	rotateSect := WindowContents()[sectionNum+6]
@@ -237,12 +237,13 @@ procedure initSections()
 end
 
 #add a new layer to a section given a name and new radius to go to. uses the previous layer to build on, so make sure to save the result
-procedure newLayer(prevShape, sectionName, newRadius)
+procedure newLayer(sectionName, newRadius)
+	prevShape := prevShapes[sectionName]
 	DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, newRadius)
 	shape := pull(WindowContents())
 	addToWSection(shape, sectionName)
 	Refresh(w)
-	return shape
+	prevShapes[sectionName] := shape
 end
 
 #add a given shape to a section with a section name.
