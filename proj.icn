@@ -1,6 +1,8 @@
 $include "evdefs.icn"
 
 link evinit
+link evnames
+link evsyms
 
 global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
 
@@ -8,16 +10,19 @@ global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
 record activation (node, parent, children)
 
 procedure main(av)
-    &window := open("Semester Project","gl", "bg=black", "size=800,600") 
+    &window := open("Semester Project","gl", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
-	Fg("diffuse white")
-	DrawSphere(0.0, 0.0, -20.0, 5.0)
-    
+	
 	epsilon := 0.1
 	theta := 0.0
 	rot := 45
 	posx := posy := posz := dirx := diry := dirz := 0
-	updatecamera(0,0,120,0)
+
+
+	Fg("diffuse white")
+	DrawSphere(0.0, 0.0, 0.0, 5.0)
+    
+	
 
 	WAttrib("pick=on")
 	
@@ -33,44 +38,50 @@ procedure main(av)
 
 	initSections()
 
-	every i := 1 to 10 do {
-		change := ?11 -1
-		if ?2 = 1 then change := -change
-		if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
-		newLayer("list", prevShapes["list"].radius2+change)
-
-		change := ?11 -1
-		if ?2 = 1 then change := -change
-		if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
-		newLayer("table", prevShapes["table"].radius2+change)
-	}
-	sectionNum := findWSection("list")
-	rotateSect := WindowContents()[sectionNum+6]
-	sectionNum2 := findWSection("table")
-	rotateSect2 := WindowContents()[sectionNum2+6]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
-	rotateSect.angle := 90
-	rotateSect2.angle := 270
-	rotateSect := WindowContents()[sectionNum+5]
-	rotateSect2 := WindowContents()[sectionNum2+5]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
-	WindowContents()[sectionNum+6].angle := 0
-	WindowContents()[sectionNum2+6].angle := 180
-	rotateSect := WindowContents()[sectionNum+4]
-	rotateSect2 := WindowContents()[sectionNum2+4]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
+	#every i := 1 to 10 do {
+	#	change := ?11 -1
+	#	if ?2 = 1 then change := -change
+	#	if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
+	#	newLayer("list", prevShapes["list"].radius2+change)
+    #
+	#	change := ?11 -1
+	#	if ?2 = 1 then change := -change
+	#	if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
+	#	newLayer("table", prevShapes["table"].radius2+change)
+	#}
+	
+	EvMon(event_mask)
+		updatecamera(120, 0, 120,-8*epsilon)
+	Refresh(&window)
+	Refresh(w)
+	
+	#sectionNum := findWSection("list")
+	#rotateSect := WindowContents()[sectionNum+6]
+	#sectionNum2 := findWSection("table")
+	#rotateSect2 := WindowContents()[sectionNum2+6]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
+	#rotateSect.angle := 90
+	#rotateSect2.angle := 270
+	#rotateSect := WindowContents()[sectionNum+5]
+	#rotateSect2 := WindowContents()[sectionNum2+5]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
+	#WindowContents()[sectionNum+6].angle := 0
+	#WindowContents()[sectionNum2+6].angle := 180
+	#rotateSect := WindowContents()[sectionNum+4]
+	#rotateSect2 := WindowContents()[sectionNum2+4]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
 	sectionNum := -1
 	lastPick := ""
     while (e := Event(&window)) ~== "q" do {
@@ -91,23 +102,23 @@ procedure main(av)
 							EraseArea(info)
 
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 32, "Total Memory: ")
-							DrawString(info, 15, 44, "Last Allocation: ")
-							DrawString(info, 15, 56, "Last Deallocation: ")
+							DrawString(info, 15, 33, "Total Memory: ")
+							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 59, "Last Deallocation: ")
 							if lastPick ~== "" then {
 								DrawString(info, 10, 80, lastPick)
-								DrawString(info, 15, 92, "Total Memory: ")
-								DrawString(info, 15, 104, "Last Allocation: ")
-								DrawString(info, 15, 116, "Last Deallocation: ")
+								DrawString(info, 15, 93, "Total Memory: ")
+								DrawString(info, 15, 106, "Last Allocation: ")
+								DrawString(info, 15, 119, "Last Deallocation: ")
 							}
 						}
 						else {
 							EraseArea(info)
 							lastPick := &pick
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 32, "Total Memory: ")
-							DrawString(info, 15, 44, "Last Allocation: ")
-							DrawString(info, 15, 56, "Last Deallocation: ")
+							DrawString(info, 15, 33, "Total Memory: ")
+							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 59, "Last Deallocation: ")
 							WindowContents()[sectionNum+2][4] *:= 2
 							WindowContents()[sectionNum+2][5] *:= 2
 							WindowContents()[sectionNum+2][6] *:= 2
@@ -155,6 +166,54 @@ procedure main(av)
 						WindowContents()[sectionNum+6].angle +:= 1
 					Refresh(x)
 				}
+				"1": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 0.0
+					}
+					Refresh(&window)
+				}
+				"2": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0 
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 180.0
+					}
+					Refresh(&window)
+				}
+				"3": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 90.0
+						WindowContents()[sectionNum+5].angle := 0.0 
+						WindowContents()[sectionNum+6].angle := 0.0 
+					}
+					Refresh(&window)
+				}
+				"4": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 90.0
+						WindowContents()[sectionNum+5].angle := 0.0 
+						WindowContents()[sectionNum+6].angle := 180.0 
+					}
+					Refresh(&window)
+				}
+				"5": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 90.0
+					}
+					Refresh(&window)
+				}
+				"6": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 180.0
+						WindowContents()[sectionNum+6].angle := 90.0
+					}
+					Refresh(&window)
+				}
 			}
     }
 	
@@ -162,32 +221,104 @@ end
 
 
 procedure EvMon(event_mask)
+	changeT := table()
+	changeT["list"] := 1
+	changeT["real"] := 1
+	changeT["record"] := 1
+	changeT["set"] := 1
+	changeT["table"] := 1
+	changeT["string"] := 1
+	
+	count := 0
+	
+	symmap := evsyms()
+	
 	while EvGet(event_mask) do{
+		val := &eventvalue
+	
+		#write(output, left(\symmap[&eventcode], 14),
+        #left(evnames(&eventcode), 35), (string|image)(val))
+	
 		case &eventcode of {
 			#"q" | "\033": stop("user quit")
 			
-			E_List   :{
-				write("List Allocated")
-				change := 1
-				prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
-				
 			
+			E_List   :{
+				#write("List Allocated")
+				
+				changeT["list"] +:= (string|image)(val)
+				
+				count +:= 1
+				
+
 			}
-			E_Lelem  : {write("List Element Allocated")}
-			E_File   : {write("File Allocated")}
-			E_Real   : {write("Real Allocated")}
-			E_Record : {write("Record Allocated")}
-			E_Selem  : {write("Set Element Allocated")}
-			E_Set    : {write("Set Allocated")}
-			E_Slots  : {write("Hash Header Allocated")}
-			E_Table  : {write("Table Allocated")}
-			E_Telem  : {write("Table Element Allocated")}
-			E_Tvsubs : {write("Substring tv Allocated")}
-			E_Tvtbl  : {write("Table-element tv Allocated")}
-			E_Cset   : {write("Cset Allocated")}
-			E_Refresh: {write("Refresh Allocated")}
-			E_String : {write("String Allocated")}
-			E_Coexpr : {write("Co-expression Allocated")}
+			E_Real   :{
+				#write("Real Allocated")
+				changeT["real"] +:= (string|image)(val)
+				
+				count +:= 1
+
+				
+			}
+			E_Record :{
+				#write("Record Allocated")
+				changeT["record"] +:= (string|image)(val)
+				
+				count +:= 1
+
+			}
+			E_Set    :{
+				#write("Set Allocated")
+				changeT["set"] +:= (string|image)(val)
+				
+				count +:= 1
+
+			}
+			
+			E_Table  :{
+				#write("Table Allocated")
+				changeT["set"] +:= (string|image)(val)
+				
+				count +:= 1
+
+			}
+			E_String :{
+				#write("String Allocated")
+				changeT["string"] +:= (string|image)(val)
+				
+				count +:= 1
+
+				
+			}
+			#E_Lelem  : {write("List Element Allocated")}
+			#E_File   : {write("File Allocated")}
+			#E_Selem  : {write("Set Element Allocated")}
+			#E_Slots  : {write("Hash Header Allocated")}
+			#E_Telem  : {write("Table Element Allocated")}
+			#E_Tvsubs : {write("Substring tv Allocated")}
+			#E_Tvtbl  : {write("Table-element tv Allocated")}
+			#E_Cset   : {write("Cset Allocated")}
+			#E_Refresh: {write("Refresh Allocated")}
+			#E_Coexpr : {write("Co-expression Allocated")}
+		}
+		
+		if count == 199 then{
+			base := 10
+			newLayer("list", prevShapes["list"].radius2+log(changeT["list"],base))
+			newLayer("real", prevShapes["real"].radius2+log(changeT["real"],base))
+			newLayer("record", prevShapes["record"].radius2+log(changeT["record"],base))
+			newLayer("set", prevShapes["set"].radius2+log(changeT["set"],base))
+			newLayer("table", prevShapes["table"].radius2+log(changeT["table"],base))
+			newLayer("string", prevShapes["string"].radius2+log(changeT["string"],base))
+			
+			changeT["list"] := 1
+			changeT["real"] := 1
+			changeT["record"] := 1
+			changeT["set"] := 1
+			changeT["table"] := 1
+			changeT["string"] := 1
+	
+			count := 0 #reset count
 		}
 
 	}
@@ -212,7 +343,7 @@ procedure initSections()
 	WSection(&window, "list")
 	 PushMatrix(&window)
 	  Fg("diffuse red")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(0.0, 0.0, 0.0, 1.0)
@@ -224,7 +355,7 @@ procedure initSections()
 	WSection(&window, "table")
 	 PushMatrix(&window)
 	  Fg("diffuse yellow")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(180.0, 0.0, 0.0, 1.0)
@@ -236,7 +367,7 @@ procedure initSections()
 	WSection(&window, "string")
 	 PushMatrix(&window)
 	  Fg("diffuse orange")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(90.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(0.0, 0.0, 0.0, 1.0)
@@ -248,7 +379,7 @@ procedure initSections()
 	WSection(&window, "real")
 	 PushMatrix(&window)
 	  Fg("diffuse green")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(90.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(180.0, 0.0, 0.0, 1.0)
@@ -260,7 +391,7 @@ procedure initSections()
 	WSection(&window, "record")
 	 PushMatrix(&window)
 	  Fg("diffuse blue")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(90.0, 0.0, 0.0, 1.0)
@@ -272,7 +403,7 @@ procedure initSections()
 	WSection(&window, "set")
 	 PushMatrix(&window)
 	  Fg("diffuse purple")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(180.0, 0.0, 1.0, 0.0)
 	  Rotate(90.0, 0.0, 0.0, 1.0)
@@ -288,7 +419,6 @@ procedure newLayer(sectionName, newRadius)
 	DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, newRadius)
 	shape := pull(WindowContents())
 	addToWSection(shape, sectionName)
-	Refresh(w)
 	prevShapes[sectionName] := shape
 end
 
