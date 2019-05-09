@@ -4,10 +4,12 @@ link evinit
 link evnames
 link evsyms
 
-global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
+global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes, info_block
 
 
 record activation (node, parent, children)
+
+record section_info (ttl_mem, alloc_time)
 
 procedure main(av)
     &window := open("Semester Project","gl", "size=800,600") 
@@ -22,8 +24,6 @@ procedure main(av)
 	Fg("diffuse white")
 	DrawSphere(0.0, 0.0, 0.0, 5.0)
     
-	
-
 	WAttrib("pick=on")
 	
 	if *av > 0 then
@@ -39,7 +39,9 @@ procedure main(av)
 	#can change section names to data type for easier lookups
 
 	initSections()
+	initInfoBlock()
 
+	
 	#every i := 1 to 10 do {
 	#	change := ?11 -1
 	#	if ?2 = 1 then change := -change
@@ -57,6 +59,9 @@ procedure main(av)
 	Refresh(&window)
 	Refresh(w)
 	
+	#every k := key(info_block) do{
+	#	write(k || ": " || info_block[k].ttl_mem)
+	#}
 	#sectionNum := findWSection("list")
 	#rotateSect := WindowContents()[sectionNum+6]
 	#sectionNum2 := findWSection("table")
@@ -104,13 +109,13 @@ procedure main(av)
 							EraseArea(info)
 
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 33, "Total Memory: ")
-							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 33, "Total Memory: " || info_block[&pick].ttl_mem)
+							DrawString(info, 15, 46, "Last Allocation: " || "event number " || info_block[&pick].alloc_time)
 							DrawString(info, 15, 59, "Last Deallocation: ")
 							if lastPick ~== "" then {
 								DrawString(info, 10, 80, lastPick)
-								DrawString(info, 15, 93, "Total Memory: ")
-								DrawString(info, 15, 106, "Last Allocation: ")
+								DrawString(info, 15, 93, "Total Memory: " || info_block[lastPick].ttl_mem)
+								DrawString(info, 15, 106, "Last Allocation: " || "event number " || info_block[lastPick].alloc_time)
 								DrawString(info, 15, 119, "Last Deallocation: ")
 							}
 						}
@@ -118,8 +123,8 @@ procedure main(av)
 							EraseArea(info)
 							lastPick := &pick
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 33, "Total Memory: ")
-							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 33, "Total Memory: " || info_block[&pick].ttl_mem)
+							DrawString(info, 15, 46, "Last Allocation: " || "event number " || info_block[&pick].alloc_time)
 							DrawString(info, 15, 59, "Last Deallocation: ")
 							WindowContents()[sectionNum+2][4] *:= 2
 							WindowContents()[sectionNum+2][5] *:= 2
@@ -224,22 +229,16 @@ end
 
 procedure EvMon(event_mask, time_slice, log_base)
 	changeT := table()
-	changeT["list"] := 1
-	changeT["real"] := 1
-	changeT["record"] := 1
-	changeT["set"] := 1
-	changeT["table"] := 1
-	changeT["string"] := 1
+	
+	every k := key(prevShapes) do changeT[k] := 1
 	
 	count := 0
+	total_count := 0
 	
 	symmap := evsyms()
 	
 	while EvGet(event_mask) do{
 		val := &eventvalue
-	
-		#write(output, left(\symmap[&eventcode], 14),
-        #left(evnames(&eventcode), 35), (string|image)(val))
 	
 		case &eventcode of {
 			#"q" | "\033": stop("user quit")
@@ -247,42 +246,57 @@ procedure EvMon(event_mask, time_slice, log_base)
 			
 			E_List | E_Lelem:{
 				#write("List/List Element Allocated"))
-				
 				changeT["list"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["list"].alloc_time := total_count
 			}
 			E_Real:{
 				#write("Real Allocated")
 				changeT["real"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["real"].alloc_time := total_count
 			}
 			E_Record:{
 				#write("Record Allocated")
 				changeT["record"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["record"].alloc_time := total_count
 			}
 			E_Set | E_Selem:{
 				#write("Set/Set Element Allocated")
-				
 				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["set"].alloc_time := total_count
 			}
-			
 			E_Table | E_Telem:{
 				#write("Table/Table Element Allocated")
 				changeT["table"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["table"].alloc_time := total_count
 			}
 			E_String:{
 				#write("String Allocated")
 				changeT["string"] +:= (string|image)(val)
 				
 				count +:= 1
+				total_count +:= 1
+				
+				info_block["string"].alloc_time := total_count
 			}
 			
 			# These are the remaining allocation events that this program does
@@ -300,6 +314,8 @@ procedure EvMon(event_mask, time_slice, log_base)
 		if count == time_slice then{			
 			every k := key(prevShapes) do{
 				newLayer(k, prevShapes[k].radius2+log(changeT[k],log_base))
+				info_block[k].ttl_mem +:= changeT[k]
+				
 				changeT[k] := 1
 			}
 			
@@ -396,6 +412,17 @@ procedure initSections()
 	 PopMatrix(&window)
 	WSection(&window)
 	prevShapes["set"] := shape
+end
+
+procedure initInfoBlock()
+	info_block := table()
+	
+	every k := key(prevShapes) do{
+		info_block[k] := section_info()
+		info_block[k].ttl_mem := 0
+		info_block[k].alloc_time := 0
+	}
+	
 end
 
 #add a new layer to a section given a name and new radius to go to. uses the previous layer to build on, so make sure to save the result
