@@ -15,7 +15,7 @@ record section_info (ttl_mem, alloc_time)
 
 procedure main(av)
     &window := open("Semester Project","gl", "size=800,600") 
-    info := open("Info Screen", "g", "size=300,400")
+    info := open("Info Screen", "g", "size=300,260")
 	infoLegend()
 	epsilon := 0.1
 	theta := 0.0
