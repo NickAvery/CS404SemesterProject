@@ -244,14 +244,12 @@ procedure EvMon(event_mask, time_slice)
 			#"q" | "\033": stop("user quit")
 			
 			
-			E_List:{
-				#write("List Allocated")
+			E_List | E_Lelem:{
+				#write("List/List Element Allocated"))
 				
 				changeT["list"] +:= (string|image)(val)
 				
 				count +:= 1
-				
-
 			}
 			E_Real:{
 				#write("Real Allocated")
@@ -265,15 +263,16 @@ procedure EvMon(event_mask, time_slice)
 				
 				count +:= 1
 			}
-			E_Set:{
-				#write("Set Allocated")
+			E_Set | E_Selem:{
+				#write("Set/Set Element Allocated")
+				
 				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
 			}
 			
-			E_Table:{
-				#write("Table Allocated")
+			E_Table | E_Telem:{
+				#write("Table/Table Element Allocated")
 				changeT["table"] +:= (string|image)(val)
 				
 				count +:= 1
@@ -284,11 +283,12 @@ procedure EvMon(event_mask, time_slice)
 				
 				count +:= 1
 			}
-			#E_Lelem  : {write("List Element Allocated")}
+			
+			# These are the remaining allocation events that this program does
+			# not actively monitor.
+			
 			#E_File   : {write("File Allocated")}
-			#E_Selem  : {write("Set Element Allocated")}
 			#E_Slots  : {write("Hash Header Allocated")}
-			#E_Telem  : {write("Table Element Allocated")}
 			#E_Tvsubs : {write("Substring tv Allocated")}
 			#E_Tvtbl  : {write("Table-element tv Allocated")}
 			#E_Cset   : {write("Cset Allocated")}
