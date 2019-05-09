@@ -33,6 +33,7 @@ procedure main(av)
 		
 	event_mask := AllocMask
 	time_slice := 200
+	log_base   := 10
 		
 	#this is the starting point for all different branch things
 	#can change section names to data type for easier lookups
@@ -51,7 +52,7 @@ procedure main(av)
 	#	newLayer("table", prevShapes["table"].radius2+change)
 	#}
 	
-	EvMon(event_mask, time_slice)
+	EvMon(event_mask, time_slice, log_base)
 		updatecamera(120, 0, 120,-8*epsilon)
 	Refresh(&window)
 	Refresh(w)
@@ -221,7 +222,7 @@ procedure main(av)
 end
 
 
-procedure EvMon(event_mask, time_slice)
+procedure EvMon(event_mask, time_slice, log_base)
 	changeT := table()
 	changeT["list"] := 1
 	changeT["real"] := 1
@@ -296,11 +297,9 @@ procedure EvMon(event_mask, time_slice)
 			#E_Coexpr : {write("Co-expression Allocated")}
 		}
 		
-		if count == time_slice then{
-			base := 10
-			
+		if count == time_slice then{			
 			every k := key(prevShapes) do{
-				newLayer(k, prevShapes[k].radius2+log(changeT[k],base))
+				newLayer(k, prevShapes[k].radius2+log(changeT[k],log_base))
 				changeT[k] := 1
 			}
 			
