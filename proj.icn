@@ -33,44 +33,48 @@ procedure main(av)
 
 	initSections()
 
-	every i := 1 to 10 do {
-		change := ?11 -1
-		if ?2 = 1 then change := -change
-		if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
-		newLayer("list", prevShapes["list"].radius2+change)
-
-		change := ?11 -1
-		if ?2 = 1 then change := -change
-		if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
-		newLayer("table", prevShapes["table"].radius2+change)
-	}
-	sectionNum := findWSection("list")
-	rotateSect := WindowContents()[sectionNum+6]
-	sectionNum2 := findWSection("table")
-	rotateSect2 := WindowContents()[sectionNum2+6]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
-	rotateSect.angle := 90
-	rotateSect2.angle := 270
-	rotateSect := WindowContents()[sectionNum+5]
-	rotateSect2 := WindowContents()[sectionNum2+5]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
-	WindowContents()[sectionNum+6].angle := 0
-	WindowContents()[sectionNum2+6].angle := 180
-	rotateSect := WindowContents()[sectionNum+4]
-	rotateSect2 := WindowContents()[sectionNum2+4]
-	every i := 1 to 360 do {
-		rotateSect.angle +:= 1
-		rotateSect2.angle +:= 1
-		Refresh(w)
-	}
+	#every i := 1 to 10 do {
+	#	change := ?11 -1
+	#	if ?2 = 1 then change := -change
+	#	if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
+	#	newLayer("list", prevShapes["list"].radius2+change)
+    #
+	#	change := ?11 -1
+	#	if ?2 = 1 then change := -change
+	#	if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
+	#	newLayer("table", prevShapes["table"].radius2+change)
+	#}
+	
+	EvMon(event_mask)
+	
+	
+	#sectionNum := findWSection("list")
+	#rotateSect := WindowContents()[sectionNum+6]
+	#sectionNum2 := findWSection("table")
+	#rotateSect2 := WindowContents()[sectionNum2+6]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
+	#rotateSect.angle := 90
+	#rotateSect2.angle := 270
+	#rotateSect := WindowContents()[sectionNum+5]
+	#rotateSect2 := WindowContents()[sectionNum2+5]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
+	#WindowContents()[sectionNum+6].angle := 0
+	#WindowContents()[sectionNum2+6].angle := 180
+	#rotateSect := WindowContents()[sectionNum+4]
+	#rotateSect2 := WindowContents()[sectionNum2+4]
+	#every i := 1 to 360 do {
+	#	rotateSect.angle +:= 1
+	#	rotateSect2.angle +:= 1
+	#	Refresh(w)
+	#}
 	sectionNum := -1
 	lastPick := ""
     while (e := Event(&window)) ~== "q" do {
@@ -162,32 +166,97 @@ end
 
 
 procedure EvMon(event_mask)
+	changeT := table()
+	changeT["list"] := 1
+	changeT["real"] := 1
+	changeT["record"] := 1
+	changeT["set"] := 1
+	changeT["table"] := 1
+	changeT["string"] := 1
+	
+	count := 0
+	
 	while EvGet(event_mask) do{
 		case &eventcode of {
 			#"q" | "\033": stop("user quit")
 			
+			
 			E_List   :{
 				write("List Allocated")
-				change := 1
-				prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
+				changeT["list"] +:= 1
 				
-			
+				count +:= 1
+				
+				#prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
+				#newLayer("list", prevShapes["list"].radius2+change)
 			}
-			E_Lelem  : {write("List Element Allocated")}
-			E_File   : {write("File Allocated")}
-			E_Real   : {write("Real Allocated")}
-			E_Record : {write("Record Allocated")}
-			E_Selem  : {write("Set Element Allocated")}
-			E_Set    : {write("Set Allocated")}
-			E_Slots  : {write("Hash Header Allocated")}
-			E_Table  : {write("Table Allocated")}
-			E_Telem  : {write("Table Element Allocated")}
-			E_Tvsubs : {write("Substring tv Allocated")}
-			E_Tvtbl  : {write("Table-element tv Allocated")}
-			E_Cset   : {write("Cset Allocated")}
-			E_Refresh: {write("Refresh Allocated")}
-			E_String : {write("String Allocated")}
-			E_Coexpr : {write("Co-expression Allocated")}
+			#E_Lelem  : {write("List Element Allocated")}
+			#E_File   : {write("File Allocated")}
+			E_Real   :{
+				write("Real Allocated")
+				change := 1
+				changeT["real"] +:= 1
+				
+				count +:= 1
+				#newLayer("real", prevShapes["real"].radius2+change)
+				
+			}
+			E_Record :{
+				write("Record Allocated")
+				changeT["record"] +:= 1
+				
+				count +:= 1
+				#newLayer("record", prevShapes["record"].radius2+change)
+			}
+			#E_Selem  : {write("Set Element Allocated")}
+			E_Set    :{
+				write("Set Allocated")
+				changeT["set"] +:= 1
+				
+				count +:= 1
+				#newLayer("set", prevShapes["set"].radius2+change)
+			}
+			#E_Slots  : {write("Hash Header Allocated")}
+			E_Table  :{
+				write("Table Allocated")
+				changeT["set"] +:= 1
+				
+				count +:= 1
+				#newLayer("table", prevShapes["table"].radius2+change)
+			}
+			#E_Telem  : {write("Table Element Allocated")}
+			#E_Tvsubs : {write("Substring tv Allocated")}
+			#E_Tvtbl  : {write("Table-element tv Allocated")}
+			#E_Cset   : {write("Cset Allocated")}
+			#E_Refresh: {write("Refresh Allocated")}
+			E_String :{
+				write("String Allocated")
+				changeT["string"] +:= 1
+				
+				count +:= 1
+				#newLayer("string", prevShapes["string"].radius2+change)
+				
+			}
+			#E_Coexpr : {write("Co-expression Allocated")}
+		}
+		
+		if count == 199 then{
+			base := 10
+			newLayer("list", prevShapes["list"].radius2+log(changeT["list"],base))
+			newLayer("real", prevShapes["real"].radius2+log(changeT["real"],base))
+			newLayer("record", prevShapes["record"].radius2+log(changeT["record"],base))
+			newLayer("set", prevShapes["set"].radius2+log(changeT["set"],base))
+			newLayer("table", prevShapes["table"].radius2+log(changeT["table"],base))
+			newLayer("string", prevShapes["string"].radius2+log(changeT["string"],base))
+			
+			changeT["list"] := 1
+			changeT["real"] := 1
+			changeT["record"] := 1
+			changeT["set"] := 1
+			changeT["table"] := 1
+			changeT["string"] := 1
+	
+			count := 0 #reset count
 		}
 
 	}
