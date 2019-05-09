@@ -10,7 +10,7 @@ global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
 record activation (node, parent, children)
 
 procedure main(av)
-    &window := open("Semester Project","gl", "bg=black", "size=800,600") 
+    &window := open("Semester Project","gl", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
 	Fg("diffuse white")
 	DrawSphere(0.0, 0.0, -20.0, 5.0)
@@ -161,6 +161,54 @@ procedure main(av)
 						WindowContents()[sectionNum+6].angle +:= 1
 					Refresh(x)
 				}
+				"1": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 0.0
+					}
+					Refresh(x)
+				}
+				"2": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0 
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 180.0
+					}
+					Refresh(x)
+				}
+				"3": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 90.0
+						WindowContents()[sectionNum+5].angle := 0.0 
+						WindowContents()[sectionNum+6].angle := 0.0 
+					}
+					Refresh(x)
+				}
+				"4": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 90.0
+						WindowContents()[sectionNum+5].angle := 0.0 
+						WindowContents()[sectionNum+6].angle := 180.0 
+					}
+					Refresh(x)
+				}
+				"5": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 0.0
+						WindowContents()[sectionNum+6].angle := 90.0
+					}
+					Refresh(x)
+				}
+				"6": {
+					if sectionNum ~= -1 then{
+						WindowContents()[sectionNum+4].angle := 0.0
+						WindowContents()[sectionNum+5].angle := 180.0
+						WindowContents()[sectionNum+6].angle := 90.0
+					}
+					Refresh(x)
+				}
 			}
     }
 	
@@ -191,7 +239,7 @@ procedure EvMon(event_mask)
 			
 			
 			E_List   :{
-				write("List Allocated")
+				#write("List Allocated")
 				
 				changeT["list"] +:= (string|image)(val)
 				
@@ -200,7 +248,7 @@ procedure EvMon(event_mask)
 
 			}
 			E_Real   :{
-				write("Real Allocated")
+				#write("Real Allocated")
 				changeT["real"] +:= (string|image)(val)
 				
 				count +:= 1
@@ -208,14 +256,14 @@ procedure EvMon(event_mask)
 				
 			}
 			E_Record :{
-				write("Record Allocated")
+				#write("Record Allocated")
 				changeT["record"] +:= (string|image)(val)
 				
 				count +:= 1
 
 			}
 			E_Set    :{
-				write("Set Allocated")
+				#write("Set Allocated")
 				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
@@ -223,14 +271,14 @@ procedure EvMon(event_mask)
 			}
 			
 			E_Table  :{
-				write("Table Allocated")
+				#write("Table Allocated")
 				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
 
 			}
 			E_String :{
-				write("String Allocated")
+				#write("String Allocated")
 				changeT["string"] +:= (string|image)(val)
 				
 				count +:= 1
