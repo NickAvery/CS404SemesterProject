@@ -32,6 +32,7 @@ procedure main(av)
 		EvInit() | stop("Unable to monitor")
 		
 	event_mask := AllocMask
+	time_slice := 200
 		
 	#this is the starting point for all different branch things
 	#can change section names to data type for easier lookups
@@ -50,7 +51,7 @@ procedure main(av)
 	#	newLayer("table", prevShapes["table"].radius2+change)
 	#}
 	
-	EvMon(event_mask)
+	EvMon(event_mask, time_slice)
 		updatecamera(120, 0, 120,-8*epsilon)
 	Refresh(&window)
 	Refresh(w)
@@ -220,7 +221,7 @@ procedure main(av)
 end
 
 
-procedure EvMon(event_mask)
+procedure EvMon(event_mask, time_slice)
 	changeT := table()
 	changeT["list"] := 1
 	changeT["real"] := 1
@@ -243,7 +244,7 @@ procedure EvMon(event_mask)
 			#"q" | "\033": stop("user quit")
 			
 			
-			E_List   :{
+			E_List:{
 				#write("List Allocated")
 				
 				changeT["list"] +:= (string|image)(val)
@@ -252,43 +253,36 @@ procedure EvMon(event_mask)
 				
 
 			}
-			E_Real   :{
+			E_Real:{
 				#write("Real Allocated")
 				changeT["real"] +:= (string|image)(val)
 				
 				count +:= 1
-
-				
 			}
-			E_Record :{
+			E_Record:{
 				#write("Record Allocated")
 				changeT["record"] +:= (string|image)(val)
 				
 				count +:= 1
-
 			}
-			E_Set    :{
+			E_Set:{
 				#write("Set Allocated")
 				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
-
 			}
 			
-			E_Table  :{
+			E_Table:{
 				#write("Table Allocated")
-				changeT["set"] +:= (string|image)(val)
+				changeT["table"] +:= (string|image)(val)
 				
 				count +:= 1
-
 			}
-			E_String :{
+			E_String:{
 				#write("String Allocated")
 				changeT["string"] +:= (string|image)(val)
 				
 				count +:= 1
-
-				
 			}
 			#E_Lelem  : {write("List Element Allocated")}
 			#E_File   : {write("File Allocated")}
@@ -302,22 +296,14 @@ procedure EvMon(event_mask)
 			#E_Coexpr : {write("Co-expression Allocated")}
 		}
 		
-		if count == 199 then{
+		if count == time_slice then{
 			base := 10
-			newLayer("list", prevShapes["list"].radius2+log(changeT["list"],base))
-			newLayer("real", prevShapes["real"].radius2+log(changeT["real"],base))
-			newLayer("record", prevShapes["record"].radius2+log(changeT["record"],base))
-			newLayer("set", prevShapes["set"].radius2+log(changeT["set"],base))
-			newLayer("table", prevShapes["table"].radius2+log(changeT["table"],base))
-			newLayer("string", prevShapes["string"].radius2+log(changeT["string"],base))
 			
-			changeT["list"] := 1
-			changeT["real"] := 1
-			changeT["record"] := 1
-			changeT["set"] := 1
-			changeT["table"] := 1
-			changeT["string"] := 1
-	
+			every k := key(prevShapes) do{
+				newLayer(k, prevShapes[k].radius2+log(changeT[k],base))
+				changeT[k] := 1
+			}
+			
 			count := 0 #reset count
 		}
 
@@ -420,6 +406,8 @@ procedure newLayer(sectionName, newRadius)
 	shape := pull(WindowContents())
 	addToWSection(shape, sectionName)
 	prevShapes[sectionName] := shape
+	
+	return 1
 end
 
 #add a given shape to a section with a section name.
