@@ -4,7 +4,9 @@ link evinit
 link evnames
 link evsyms
 
-global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes, info_block
+
+global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes, info_block, info
+
 
 
 record activation (node, parent, children)
@@ -14,7 +16,7 @@ record section_info (ttl_mem, alloc_time)
 procedure main(av)
     &window := open("Semester Project","gl", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
-	
+	infoLegend()
 	epsilon := 0.1
 	theta := 0.0
 	rot := 45
@@ -106,7 +108,7 @@ procedure main(av)
 				-1:  {
 					if \&pick then {
 						if &shift then {
-							EraseArea(info)
+							EraseArea(info, 0, 0, 300, 134)
 
 							DrawString(info, 10, 20, &pick)
 							DrawString(info, 15, 33, "Total Memory: " || info_block[&pick].ttl_mem)
@@ -120,7 +122,7 @@ procedure main(av)
 							}
 						}
 						else {
-							EraseArea(info)
+							EraseArea(info, 0, 0, 300, 134)
 							lastPick := &pick
 							DrawString(info, 10, 20, &pick)
 							DrawString(info, 15, 33, "Total Memory: " || info_block[&pick].ttl_mem)
@@ -225,7 +227,6 @@ procedure main(av)
     }
 	
 end
-
 
 procedure EvMon(event_mask, time_slice, log_base)
 	changeT := table()
@@ -337,6 +338,32 @@ procedure updatecamera(dx,dy,dz,dtheta)
    Eye(posx,posy,posz,dirx,diry,dirz,0,1,0)
 end
 
+procedure infoLegend()
+	Fg(info, "red")
+	FillRectangle(info, 10, 135, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 145, "list (default postion: 1)")
+	Fg(info, "yellow")
+	FillRectangle(info, 10, 155, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 165, "table (default postion: 2)")
+	Fg(info, "orange")
+	FillRectangle(info, 10, 175, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 185, "string (default postion: 3)")
+	Fg(info, "green")
+	FillRectangle(info, 10, 195, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 205, "real (default postion: 4)")
+    Fg(info, "blue")
+	FillRectangle(info, 10, 215, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 225, "record (default postion: 5)")
+	Fg(info, "purple")
+	FillRectangle(info, 10, 235, 15, 15)
+	Fg(info, "black")
+	DrawString(info, 30, 245, "set (default postion: 6)")
+end
 #helper for creating all the different data type sections
 procedure initSections()
 	prevShapes := table()
