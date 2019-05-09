@@ -12,14 +12,17 @@ record activation (node, parent, children)
 procedure main(av)
     &window := open("Semester Project","gl", "size=800,600") 
     info := open("Info Screen", "g", "size=300,400")
-	Fg("diffuse white")
-	DrawSphere(0.0, 0.0, -20.0, 5.0)
-    
+	
 	epsilon := 0.1
 	theta := 0.0
 	rot := 45
 	posx := posy := posz := dirx := diry := dirz := 0
-	updatecamera(0,0,120,0)
+
+
+	Fg("diffuse white")
+	DrawSphere(0.0, 0.0, 0.0, 5.0)
+    
+	
 
 	WAttrib("pick=on")
 	
@@ -48,7 +51,9 @@ procedure main(av)
 	#}
 	
 	EvMon(event_mask)
-	
+		updatecamera(120, 0, 120,-8*epsilon)
+	Refresh(&window)
+	Refresh(w)
 	
 	#sectionNum := findWSection("list")
 	#rotateSect := WindowContents()[sectionNum+6]
@@ -97,23 +102,23 @@ procedure main(av)
 							EraseArea(info)
 
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 32, "Total Memory: ")
-							DrawString(info, 15, 44, "Last Allocation: ")
-							DrawString(info, 15, 56, "Last Deallocation: ")
+							DrawString(info, 15, 33, "Total Memory: ")
+							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 59, "Last Deallocation: ")
 							if lastPick ~== "" then {
 								DrawString(info, 10, 80, lastPick)
-								DrawString(info, 15, 92, "Total Memory: ")
-								DrawString(info, 15, 104, "Last Allocation: ")
-								DrawString(info, 15, 116, "Last Deallocation: ")
+								DrawString(info, 15, 93, "Total Memory: ")
+								DrawString(info, 15, 106, "Last Allocation: ")
+								DrawString(info, 15, 119, "Last Deallocation: ")
 							}
 						}
 						else {
 							EraseArea(info)
 							lastPick := &pick
 							DrawString(info, 10, 20, &pick)
-							DrawString(info, 15, 32, "Total Memory: ")
-							DrawString(info, 15, 44, "Last Allocation: ")
-							DrawString(info, 15, 56, "Last Deallocation: ")
+							DrawString(info, 15, 33, "Total Memory: ")
+							DrawString(info, 15, 46, "Last Allocation: ")
+							DrawString(info, 15, 59, "Last Deallocation: ")
 							WindowContents()[sectionNum+2][4] *:= 2
 							WindowContents()[sectionNum+2][5] *:= 2
 							WindowContents()[sectionNum+2][6] *:= 2
@@ -167,7 +172,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 0.0
 						WindowContents()[sectionNum+6].angle := 0.0
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 				"2": {
 					if sectionNum ~= -1 then{
@@ -175,7 +180,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 0.0
 						WindowContents()[sectionNum+6].angle := 180.0
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 				"3": {
 					if sectionNum ~= -1 then{
@@ -183,7 +188,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 0.0 
 						WindowContents()[sectionNum+6].angle := 0.0 
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 				"4": {
 					if sectionNum ~= -1 then{
@@ -191,7 +196,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 0.0 
 						WindowContents()[sectionNum+6].angle := 180.0 
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 				"5": {
 					if sectionNum ~= -1 then{
@@ -199,7 +204,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 0.0
 						WindowContents()[sectionNum+6].angle := 90.0
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 				"6": {
 					if sectionNum ~= -1 then{
@@ -207,7 +212,7 @@ procedure main(av)
 						WindowContents()[sectionNum+5].angle := 180.0
 						WindowContents()[sectionNum+6].angle := 90.0
 					}
-					Refresh(x)
+					Refresh(&window)
 				}
 			}
     }
@@ -338,7 +343,7 @@ procedure initSections()
 	WSection(&window, "list")
 	 PushMatrix(&window)
 	  Fg("diffuse red")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(0.0, 0.0, 0.0, 1.0)
@@ -350,7 +355,7 @@ procedure initSections()
 	WSection(&window, "table")
 	 PushMatrix(&window)
 	  Fg("diffuse yellow")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(180.0, 0.0, 0.0, 1.0)
@@ -362,7 +367,7 @@ procedure initSections()
 	WSection(&window, "string")
 	 PushMatrix(&window)
 	  Fg("diffuse orange")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(90.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(0.0, 0.0, 0.0, 1.0)
@@ -374,7 +379,7 @@ procedure initSections()
 	WSection(&window, "real")
 	 PushMatrix(&window)
 	  Fg("diffuse green")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(90.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(180.0, 0.0, 0.0, 1.0)
@@ -386,7 +391,7 @@ procedure initSections()
 	WSection(&window, "record")
 	 PushMatrix(&window)
 	  Fg("diffuse blue")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(0.0, 0.0, 1.0, 0.0)
 	  Rotate(90.0, 0.0, 0.0, 1.0)
@@ -398,7 +403,7 @@ procedure initSections()
 	WSection(&window, "set")
 	 PushMatrix(&window)
 	  Fg("diffuse purple")
-	  Translate(0.0, 0.0, -20.0)
+	  Translate(0.0, 0.0, 0.0)
 	  Rotate(0.0, 1.0, 0.0, 0.0)
 	  Rotate(180.0, 0.0, 1.0, 0.0)
 	  Rotate(90.0, 0.0, 0.0, 1.0)
@@ -414,7 +419,6 @@ procedure newLayer(sectionName, newRadius)
 	DrawCylinder(prevShape.x, prevShape.y+prevShape.height, prevShape.z, prevShape.height, prevShape.radius2, newRadius)
 	shape := pull(WindowContents())
 	addToWSection(shape, sectionName)
-	Refresh(w)
 	prevShapes[sectionName] := shape
 end
 
