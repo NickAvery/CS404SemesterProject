@@ -1,6 +1,8 @@
 $include "evdefs.icn"
 
 link evinit
+link evnames
+link evsyms
 
 global theta, posx, posy, posz, dirx, diry, dirz, shape, rot, prevShapes
 
@@ -176,67 +178,74 @@ procedure EvMon(event_mask)
 	
 	count := 0
 	
+	symmap := evsyms()
+	
 	while EvGet(event_mask) do{
+		val := &eventvalue
+	
+		#write(output, left(\symmap[&eventcode], 14),
+        #left(evnames(&eventcode), 35), (string|image)(val))
+	
 		case &eventcode of {
 			#"q" | "\033": stop("user quit")
 			
 			
 			E_List   :{
 				write("List Allocated")
-				changeT["list"] +:= 1
+				
+				changeT["list"] +:= (string|image)(val)
 				
 				count +:= 1
 				
-				#prevShape := newLayer(prevShape, "list", prevShape.radius2+change)
-				#newLayer("list", prevShapes["list"].radius2+change)
+
 			}
-			#E_Lelem  : {write("List Element Allocated")}
-			#E_File   : {write("File Allocated")}
 			E_Real   :{
 				write("Real Allocated")
-				change := 1
-				changeT["real"] +:= 1
+				changeT["real"] +:= (string|image)(val)
 				
 				count +:= 1
-				#newLayer("real", prevShapes["real"].radius2+change)
+
 				
 			}
 			E_Record :{
 				write("Record Allocated")
-				changeT["record"] +:= 1
+				changeT["record"] +:= (string|image)(val)
 				
 				count +:= 1
-				#newLayer("record", prevShapes["record"].radius2+change)
+
 			}
-			#E_Selem  : {write("Set Element Allocated")}
 			E_Set    :{
 				write("Set Allocated")
-				changeT["set"] +:= 1
+				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
-				#newLayer("set", prevShapes["set"].radius2+change)
+
 			}
-			#E_Slots  : {write("Hash Header Allocated")}
+			
 			E_Table  :{
 				write("Table Allocated")
-				changeT["set"] +:= 1
+				changeT["set"] +:= (string|image)(val)
 				
 				count +:= 1
-				#newLayer("table", prevShapes["table"].radius2+change)
+
 			}
+			E_String :{
+				write("String Allocated")
+				changeT["string"] +:= (string|image)(val)
+				
+				count +:= 1
+
+				
+			}
+			#E_Lelem  : {write("List Element Allocated")}
+			#E_File   : {write("File Allocated")}
+			#E_Selem  : {write("Set Element Allocated")}
+			#E_Slots  : {write("Hash Header Allocated")}
 			#E_Telem  : {write("Table Element Allocated")}
 			#E_Tvsubs : {write("Substring tv Allocated")}
 			#E_Tvtbl  : {write("Table-element tv Allocated")}
 			#E_Cset   : {write("Cset Allocated")}
 			#E_Refresh: {write("Refresh Allocated")}
-			E_String :{
-				write("String Allocated")
-				changeT["string"] +:= 1
-				
-				count +:= 1
-				#newLayer("string", prevShapes["string"].radius2+change)
-				
-			}
 			#E_Coexpr : {write("Co-expression Allocated")}
 		}
 		
