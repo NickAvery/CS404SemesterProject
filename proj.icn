@@ -13,7 +13,7 @@ record activation (node, parent, children)
 
 record section_info (ttl_mem, alloc_time)
 
-procedure main(av)
+procedure main(args)
     &window := open("Semester Project","gl", "size=800,600") 
     info := open("Info Screen", "g", "size=300,260")
 	infoLegend()
@@ -28,69 +28,44 @@ procedure main(av)
     
 	WAttrib("pick=on")
 	
-	if *av > 0 then
-		EvInit(av) | stop("EvInit() is unable to load: ", av[1])
-	else
-		EvInit() | stop("Unable to monitor")
+
+	
+	
+	
 		
 	event_mask := AllocMask ++ E_Exit
 	time_slice := 200
 	log_base   := 10
+	
+	every arg:= !args do{
+		if arg ? match("-lb=") then{
+			log_base := numeric(arg[5:0]) | stop("Error - Unable to read " || arg[5:0] || " as a valid log base")
+		}else if arg ? match("-ts=") then{
+			time_slice := numeric(arg[5:0]) | stop("Error - Unable to read " || arg[5:0] || " as a valid time slice")
+		}else{
+			av := arg
+		}
+	}
+	
+	if *av > 0 then
+		EvInit(av) | stop("EvInit() is unable to load: ", av[1])
+	else
+		EvInit() | stop("Unable to monitor")
+	
 		
 	#this is the starting point for all different branch things
 	#can change section names to data type for easier lookups
 
 	initSections()
 	initInfoBlock()
-
-	
-	#every i := 1 to 10 do {
-	#	change := ?11 -1
-	#	if ?2 = 1 then change := -change
-	#	if prevShapes["list"].radius2+change < 0 then change := 0-prevShapes["list"].radius2
-	#	newLayer("list", prevShapes["list"].radius2+change)
-    #
-	#	change := ?11 -1
-	#	if ?2 = 1 then change := -change
-	#	if prevShapes["table"].radius2+change < 0 then change := 0-prevShapes["table"].radius2
-	#	newLayer("table", prevShapes["table"].radius2+change)
-	#}
 	
 	EvMon(event_mask, time_slice, log_base)
 		updatecamera(120, 0, 120,-8*epsilon)
 	Refresh(&window)
 	Refresh(w)
 	
-	#every k := key(info_block) do{
-	#	write(k || ": " || info_block[k].ttl_mem)
-	#}
-	#sectionNum := findWSection("list")
-	#rotateSect := WindowContents()[sectionNum+6]
-	#sectionNum2 := findWSection("table")
-	#rotateSect2 := WindowContents()[sectionNum2+6]
-	#every i := 1 to 360 do {
-	#	rotateSect.angle +:= 1
-	#	rotateSect2.angle +:= 1
-	#	Refresh(w)
-	#}
-	#rotateSect.angle := 90
-	#rotateSect2.angle := 270
-	#rotateSect := WindowContents()[sectionNum+5]
-	#rotateSect2 := WindowContents()[sectionNum2+5]
-	#every i := 1 to 360 do {
-	#	rotateSect.angle +:= 1
-	#	rotateSect2.angle +:= 1
-	#	Refresh(w)
-	#}
-	#WindowContents()[sectionNum+6].angle := 0
-	#WindowContents()[sectionNum2+6].angle := 180
-	#rotateSect := WindowContents()[sectionNum+4]
-	#rotateSect2 := WindowContents()[sectionNum2+4]
-	#every i := 1 to 360 do {
-	#	rotateSect.angle +:= 1
-	#	rotateSect2.angle +:= 1
-	#	Refresh(w)
-	#}
+
+	
 	sectionNum := -1
 	lastPick := ""
     while (e := Event(&window)) ~== "q" do {
