@@ -33,7 +33,7 @@ procedure main(av)
 	else
 		EvInit() | stop("Unable to monitor")
 		
-	event_mask := AllocMask
+	event_mask := AllocMask ++ E_Exit
 	time_slice := 200
 	log_base   := 10
 		
@@ -300,6 +300,22 @@ procedure EvMon(event_mask, time_slice, log_base)
 				info_block["string"].alloc_time := total_count
 			}
 			
+			E_Exit:{
+				# This handles the last time slice before the target program stops
+			
+				every k := key(prevShapes) do{
+					if log_base == -1 then{
+						# This uses a 1:1 byte to size scaling, can get out of hand quick
+						newLayer(k, prevShapes[k].radius2+(changeT[k]-1))
+					}else{
+						# This uses a log calculation to scale the cones size
+						newLayer(k, prevShapes[k].radius2+log(changeT[k],log_base))
+					}
+					info_block[k].ttl_mem +:= changeT[k] - 1
+					count := 0
+				}
+			}
+			
 			# These are the remaining allocation events that this program does
 			# not actively monitor.
 			
@@ -314,9 +330,14 @@ procedure EvMon(event_mask, time_slice, log_base)
 		
 		if count == time_slice then{			
 			every k := key(prevShapes) do{
-				newLayer(k, prevShapes[k].radius2+log(changeT[k],log_base))
-				info_block[k].ttl_mem +:= changeT[k]
-				
+				if log_base == -1 then{
+					# This uses a 1:1 byte to size scaling, can get out of hand quick
+					newLayer(k, prevShapes[k].radius2+(changeT[k]-1))
+				}else{
+					# This uses a log calculation to scale the cones size
+					newLayer(k, prevShapes[k].radius2+log(changeT[k],log_base))
+				}
+				info_block[k].ttl_mem +:= changeT[k] - 1
 				changeT[k] := 1
 			}
 			
